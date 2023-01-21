@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+function number(num) {
+  if (isNaN(+num)) return 0;
+
+  return +num;
+}
 
 export default function Home() {
   const [count, setCount] = useState(1);
-  const [input, setInput] = useState(180);
+  const [input, setInput] = useState();
   const [result, setResult] = useState(0);
   const [types, setTypes] = useState([]);
+
+  const numberInput = useMemo(() => number(input), [input]);
+  const numberCount = useMemo(() => number(count), [count]);
 
   const addType = () => {
     const copyTypes = structuredClone(types);
@@ -16,16 +25,18 @@ export default function Home() {
 
   const calculate = () => {
     const calcTypes = types.reduce((prev, curr) => {
+      const prevNumber = number(prev);
+      const currNumber = number(curr?.value);
       if (curr.type === "add") {
-        return +prev + +prev * (+curr.value / 100);
+        return prevNumber + prevNumber * (currNumber / 100);
       }
 
       if (curr.type === "subtract") {
-        return +prev - +prev * (+curr.value / 100);
+        return prevNumber - prevNumber * (currNumber / 100);
       }
 
       return prev;
-    }, input * count);
+    }, numberCount * numberInput);
 
     setResult(calcTypes);
   };
@@ -58,7 +69,7 @@ export default function Home() {
             value={input}
             className="border rounded-md px-2 py-2 flex-1"
             type="number"
-            onChange={(e) => setInput(+e.target.value)}
+            onChange={(e) => setInput(number(e.target.value))}
           />
         </div>
         <div className="flex items-center gap-x-4">
@@ -69,7 +80,7 @@ export default function Home() {
             value={count}
             className="border rounded-md px-2 py-2 flex-1"
             type="number"
-            onChange={(e) => setCount(+e.target.value)}
+            onChange={(e) => setCount(number(e.target.value))}
           />
         </div>
         {types.map((_input, index) => (
@@ -80,22 +91,22 @@ export default function Home() {
                 handleChangeType(
                   {
                     type: _input.type === "add" ? "subtract" : "add",
-                    value: _input.value,
+                    value: number(_input.value),
                   },
                   index
                 )
               }
             >
-              {_input.type === "subtract" ? "İskonto %" : "Arttır %"}
+              {_input.type === "subtract" ? "% İskonto" : "% Arttır"}
             </button>
             <div className="flex items-center flex-1 gap-x-2 relative">
               <input
                 type="number"
-                value={_input.value}
+                value={number(_input.value)}
                 className="border rounded-md px-2 py-2 flex-1"
                 onChange={(e) =>
                   handleChangeType(
-                    { type: _input.type, value: e.target.value },
+                    { type: _input.type, value: number(e.target.value) },
                     index
                   )
                 }
@@ -131,7 +142,7 @@ export default function Home() {
           <div className="w-[4.5rem]"></div>
           <div className="flex items-center gap-x-2">
             <strong className="font-medium">Sonuç: </strong>
-            <span>{(+result).toFixed(3)}</span>
+            <span>{number(result).toFixed(3)}</span>
           </div>
         </div>
       </div>
