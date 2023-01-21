@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 function number(num) {
   if (isNaN(+num)) return 0;
@@ -15,10 +15,15 @@ export default function Home() {
   const numberInput = useMemo(() => number(input), [input]);
   const numberCount = useMemo(() => number(count), [count]);
 
-  const addType = () => {
-    const copyTypes = structuredClone(types);
+  const fieldsWithoutRef = types.map((field) => ({
+    value: field.value,
+    type: field.type,
+  }));
 
-    copyTypes.push({ type: "add", value: 0 });
+  const addType = () => {
+    const copyTypes = structuredClone(fieldsWithoutRef);
+
+    copyTypes.push({ type: "add", value: "" });
 
     setTypes(copyTypes);
   };
@@ -42,7 +47,7 @@ export default function Home() {
   };
 
   const handleChangeType = (val, index) => {
-    const copyTypes = structuredClone(types);
+    const copyTypes = structuredClone(fieldsWithoutRef);
 
     copyTypes[index] = val;
 
@@ -50,12 +55,18 @@ export default function Home() {
   };
 
   const handleRowDelete = (index) => {
-    const copyTypes = structuredClone(types);
+    const copyTypes = structuredClone(fieldsWithoutRef);
 
     copyTypes.splice(index, 1);
 
     setTypes(copyTypes);
   };
+
+  useEffect(() => {
+    const lastInputRef = types[types.length - 1]?.inputRef;
+    lastInputRef?.focus?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [types.length]);
 
   return (
     <div className="container mx-auto md:max-w-xl border md:rounded-md pl-2 pr-6 md:px-6 py-4 mt-10">
@@ -69,7 +80,7 @@ export default function Home() {
             value={input}
             className="border rounded-md px-2 py-2 flex-1"
             type="number"
-            onChange={(e) => setInput(number(e.target.value))}
+            onChange={(e) => setInput(e.target.value)}
           />
         </div>
         <div className="flex items-center gap-x-4">
@@ -80,7 +91,7 @@ export default function Home() {
             value={count}
             className="border rounded-md px-2 py-2 flex-1"
             type="number"
-            onChange={(e) => setCount(number(e.target.value))}
+            onChange={(e) => setCount(e.target.value)}
           />
         </div>
         {types.map((_input, index) => (
@@ -91,7 +102,7 @@ export default function Home() {
                 handleChangeType(
                   {
                     type: _input.type === "add" ? "subtract" : "add",
-                    value: number(_input.value),
+                    value: _input.value,
                   },
                   index
                 )
@@ -102,11 +113,12 @@ export default function Home() {
             <div className="flex items-center flex-1 gap-x-2 relative">
               <input
                 type="number"
-                value={number(_input.value)}
+                value={_input.value}
+                ref={(e) => (_input.inputRef = e)}
                 className="border rounded-md px-2 py-2 flex-1"
                 onChange={(e) =>
                   handleChangeType(
-                    { type: _input.type, value: number(e.target.value) },
+                    { type: _input.type, value: e.target.value },
                     index
                   )
                 }
