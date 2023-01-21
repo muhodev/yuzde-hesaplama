@@ -69,7 +69,7 @@ export default function Home() {
   }, [types.length]);
 
   return (
-    <div className="container mx-auto md:max-w-xl border md:rounded-md pl-2 pr-6 md:px-6 py-4 mt-10">
+    <div className="container mx-auto md:max-w-xl md:border md:rounded-md pl-2 pr-6 md:px-6 py-4 mt-3 md:mt-10">
       <h1 className="text-center font-bold pb-4 text-lg">Yüzde Hesaplama</h1>
       <div className="space-y-4">
         <div className="flex items-center gap-x-4">
